@@ -71,17 +71,28 @@ def handle_session_end_request():
 def countTo(session, intent):
     card_title = "Count"
     curr = 0
+    speech_output = ""
     entry = {'count': 0}
     #If there was a response from the user, the first if statement is called.
     if 'attributes' in session:
-        if 'value' in intent['slots']['numbers'] and int(intent['slots']['numbers']['value']) < 100 and intent['slots']['numbers']['resolutions']['resolutionsPerAuthority'][0]['status']['code'] != "ER_SUCCESS_NO_MATCH":
-            #If the reponse was a number and is less than 100, alexa will say the next number.
-            curr = int(intent['slots']['numbers']['value']) + 1
-            entry['count'] = curr
+        if(intent['slots']['numbers']['value'].isdigit()):
+            if 'value' in intent['slots']['numbers'] and int(intent['slots']['numbers']['value']) < 100 and intent['slots']['numbers']['resolutions']['resolutionsPerAuthority'][0]['status']['code'] != "ER_SUCCESS_NO_MATCH":
+                #If the reponse was a number and is less than 100, alexa will say the next number.
+                if(int(intent['slots']['numbers']['value']) == session['attributes']['count'] + 1):
+                    curr = int(intent['slots']['numbers']['value']) + 1
+                    entry['count'] = curr
+                else:
+                    speech_output += "I believe you meant "
+                    curr = int(session['attributes']['count']) + 1
+                    entry['count'] = session['attributes']['count']
+            else:
+                #A response is not given so the current number is incremented instead.
+                curr = session['attributes']['count'] + 1
+                entry['count'] = curr
         else:
-            #A response is not given so the current number is incremented instead.
-            curr = session['attributes']['count'] + 1
-            entry['count'] = curr
+            speech_output += "Please say a real number. The next number is "
+            curr = int(session['attributes']['count']) + 1
+            entry['count'] = session['attributes']['count']
     else:
         if 'value' in intent['slots']['numbers'] and int(intent['slots']['numbers']['value']) < 100 and intent['slots']['numbers']['resolutions']['resolutionsPerAuthority'][0]['status']['code'] != "ER_SUCCESS_NO_MATCH":
             curr = int(intent['slots']['numbers']['value']) + 1
@@ -90,7 +101,7 @@ def countTo(session, intent):
             entry['count'] = 1
             curr = 1
 
-    speech_output = str(curr)
+    speech_output += str(curr)
     return build_response(entry, build_speechlet_response(
         card_title, speech_output, None, False))
 
