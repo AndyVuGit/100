@@ -84,10 +84,17 @@ def countTo(session, intent):
             if(int(intent['slots']['numbers']['value']) == session['attributes']['count'] + 1):
                 curr = int(intent['slots']['numbers']['value']) + 1
                 entry['count'] = curr
+                if (curr == 100):
+                    speech_output += str(curr) + ". "
+                    speech_output += "Congratulation. You have counted to 100. Counting with Alexa will now end."
+                    return build_response(entry, build_speechlet_response(card_title, speech_output, None, True))
             else:
                 speech_output += "I believe you meant "
                 curr = int(session['attributes']['count']) + 1
                 entry['count'] = session['attributes']['count']
+        elif int(intent['slots']['numbers']['value']) == 100:
+            speech_output += "Congratulation. You have counted to 100. Counting with Alexa will now end."
+            return build_response(entry, build_speechlet_response(card_title, speech_output, None, True))
         else:
             speech_output += "Please say a real number. The next number is "
             curr = int(session['attributes']['count']) + 1
@@ -99,9 +106,16 @@ def countTo(session, intent):
         elif intent['slots']['numbers']['resolutions']['resolutionsPerAuthority'][0]['status']['code'] == "ER_SUCCESS_NO_MATCH":
             entry['count'] = 1
             curr = 1
+        elif intent['slots']['numbers']['value'] == "100":
+            speech_output = "Please say a number less than 100."
+            curr = ""
         else:
             curr = int(intent['slots']['numbers']['value']) + 1
             entry['count'] = curr
+            if (curr == 100):
+                    speech_output += str(curr) + ". "
+                    speech_output += "Congratulation. You have counted to 100. Counting with Alexa will now end."
+                    return build_response(entry, build_speechlet_response(card_title, speech_output, None, True))
 
 
     speech_output += str(curr)
